@@ -1,3 +1,4 @@
 streamlit
 torch
 torchvision
+pytorch-grad-cam>=1.4.8
