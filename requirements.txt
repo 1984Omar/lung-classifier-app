@@ -1,9 +1,7 @@
-streamlit
+streamlit==1.38.0
+pygments==2.19.2
+markdown-it-py==4.0.0
+mdurl==0.1.2
+rich==14.1.0
 torch
 torchvision
-numpy
-Pillow
-opencv-python-headless
-pytorch-grad-cam
-matplotlib
-scipy
