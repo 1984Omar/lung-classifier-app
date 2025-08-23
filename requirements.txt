@@ -1,9 +1,6 @@
-# --- PyTorch Libraries: Pointing directly to pre-compiled CPU wheels for Python 3.9 ---
-https://download.pytorch.org/whl/cpu/torch-2.1.2%2Bcpu-cp39-cp39-linux_x86_64.whl
-https://download.pytorch.org/whl/cpu/torchvision-0.16.2%2Bcpu-cp39-cp39-linux_x86_64.whl
-
-# --- Other Application Dependencies ---
 streamlit
+torch
+torchvision
 numpy
 Pillow
 opencv-python-headless
