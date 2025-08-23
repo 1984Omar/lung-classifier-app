@@ -1,22 +1,4 @@
-# Core app
-streamlit==1.38.0
-
-# Deep learning
-torch>=2.2.0
-torchvision>=0.17.0
-pytorch-grad-cam>=1.4.8
-
-# Data handling
-numpy
-pandas
-
-# Image handling
-Pillow
-opencv-python-headless  # "headless" avoids GUI errors on Streamlit Cloud
-
-# ML utilities
-scikit-learn
-
-# Visualization
-matplotlib
-seaborn
+streamlit
+torch
+torchvision
+pytorch_grad_cam
