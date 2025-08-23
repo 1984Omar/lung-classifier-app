@@ -1,9 +1,9 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 
-streamlit
-torch
-torchvision
-numpy
-opencv-python-headless
-Pillow
-pytorch-grad-cam
+streamlit==1.37.0
+torch==2.3.1
+torchvision==0.18.1
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+Pillow==10.4.0
+pytorch-grad-cam==0.3.2
