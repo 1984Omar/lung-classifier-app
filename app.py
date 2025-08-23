@@ -136,28 +136,40 @@ def get_target_layer(model):
     """Finds the target layer for Grad-CAM visualization."""
     return model.backbone.features[-1]
 
-def generate_gradcam_overlay(model, input_tensor, original_image, target_layer, target_class_index):
-    """Generates Grad-CAM++ visualization."""
+# --- FIX ---: This function is updated to resolve the broadcast error.
+def generate_gradcam_overlay(model, input_tensor, target_layer, target_class_index):
+    """Generates Grad-CAM++ visualization on a 224x224 image."""
     if target_layer is None:
-        return np.array(original_image)
+        return None
+    
+    # Create an image to overlay the CAM on.
+    # This involves un-normalizing the tensor and converting it to a NumPy array.
+    inv_normalize = transforms.Normalize(
+       mean=[-0.485/0.229, -0.456/0.224, -0.406/0.225],
+       std=[1/0.229, 1/0.224, 1/0.225]
+    )
+    img_tensor_unnormalized = inv_normalize(input_tensor[0])
+    rgb_img = img_tensor_unnormalized.permute(1, 2, 0).cpu().numpy()
+    rgb_img = np.clip(rgb_img, 0, 1)
+
     targets = [ClassifierOutputTarget(target_class_index)]
     try:
         with GradCAMPlusPlus(model=model, target_layers=[target_layer]) as cam:
             grayscale_cam = cam(input_tensor=input_tensor, targets=targets, aug_smooth=True, eigen_smooth=True)[0, :]
-            original_np = np.array(original_image) / 255.0
-            visualization = show_cam_on_image(original_np, grayscale_cam, use_rgb=True)
+            # Now, overlay the CAM on the 224x224 `rgb_img`, which has the correct dimensions.
+            visualization = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
             return visualization
     except Exception as e:
         st.warning(f"Grad-CAM generation failed: {e}")
-        return np.array(original_image)
+        return None
 
 # =============================================================================
 # Streamlit User Interface
 # =============================================================================
 
-st.set_page_config(page_title="Lung Image Classifier", layout="wide")
+st.set_page_config(page_title="Lung Cancer Image Classifier", layout="wide")
 
-st.title("🩺 Lung Medical Image Classifier")
+st.title("🩺 Lung Cancer Medical Image Classifier")
 st.markdown("##### By Omar Ibrahim Obaid")
 st.markdown("""
 This web app utilizes a deep learning model to classify lung CT scan images as **Benign**, **Malignant**, or **Normal**.
@@ -181,7 +193,8 @@ if model:
         with col1:
             st.subheader("Uploaded Image")
             input_tensor, original_image = preprocess_image(uploaded_file)
-            st.image(original_image, caption="Your uploaded image.", use_column_width=True)
+            # --- FIX ---: Changed use_column_width to use_container_width
+            st.image(original_image, caption="Your uploaded image.", use_container_width=True)
 
         with col2:
             st.subheader("Prediction")
@@ -203,8 +216,11 @@ if model:
                 target_layer = get_target_layer(model)
                 if target_layer:
                     with st.spinner("Generating visualization..."):
-                        gradcam_overlay = generate_gradcam_overlay(model, input_tensor, original_image, target_layer, pred_idx)
-                        st.image(gradcam_overlay, caption=f"Grad-CAM++ for '{pred_name}'", use_column_width=True)
+                        # --- FIX ---: Updated the function call to not pass original_image
+                        gradcam_overlay = generate_gradcam_overlay(model, input_tensor, target_layer, pred_idx)
+                        if gradcam_overlay is not None:
+                            # --- FIX ---: Changed use_column_width to use_container_width
+                            st.image(gradcam_overlay, caption=f"Grad-CAM++ for '{pred_name}'", use_container_width=True)
                 else:
                     st.warning("Could not identify a target layer for Grad-CAM.")
 else:
